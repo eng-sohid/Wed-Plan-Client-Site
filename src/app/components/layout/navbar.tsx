@@ -44,14 +44,14 @@ export default function Navbar() {
         {/* Desktop Buttons */}
         <div className="hidden items-center gap-3 md:flex">
           <Link
-            href="/sign-in"
+            href="/auth/sign-in"
             className="rounded-full px-5 py-2.5 text-sm font-semibold text-[#526b50] transition hover:bg-[#eeefe9]"
           >
             Sign In
           </Link>
 
           <Link
-            href="/sign-up"
+            href="/auth/sign-up"
             className="flex items-center gap-2 rounded-full bg-[#526b50] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#40563e]"
           >
             Get Started
@@ -87,7 +87,7 @@ export default function Navbar() {
 
             <div className="flex gap-3 border-t border-[#e8e6de] pt-5">
               <Link
-                href="/sign-in"
+                href="/auth/sign-in"
                 onClick={() => setIsOpen(false)}
                 className="flex-1 rounded-full border border-[#526b50] py-3 text-center text-sm font-semibold text-[#526b50]"
               >
@@ -95,7 +95,7 @@ export default function Navbar() {
               </Link>
 
               <Link
-                href="/sign-up"
+                href="/auth/sign-up"
                 onClick={() => setIsOpen(false)}
                 className="flex-1 rounded-full bg-[#526b50] py-3 text-center text-sm font-semibold text-white"
               >
