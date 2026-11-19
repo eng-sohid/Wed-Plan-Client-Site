@@ -22,8 +22,20 @@ async function getToken() {
 
 async function parse<T>(res: Response): Promise<T> {
   const data = await res.json().catch(() => ({}));
-  if (!res.ok)
-    throw new Error((data as { message?: string }).message || "Request failed");
+
+  if (!res.ok) {
+    console.error("API Error:", {
+      status: res.status,
+      response: data,
+    });
+
+    throw new Error(
+      (data as { message?: string }).message ||
+        (data as { error?: string }).error ||
+        "Request failed",
+    );
+  }
+
   return data as T;
 }
 

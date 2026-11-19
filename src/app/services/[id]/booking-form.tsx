@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+import { api } from "@/lib/api";
 
 type BookingFormProps = {
   serviceId: string;
@@ -22,7 +20,8 @@ export default function BookingForm({
     name: "",
     email: "",
     phone: "",
-    weddingDate: "",
+    eventDate: "",
+    eventLocation: "",
     message: "",
   });
 
@@ -43,22 +42,15 @@ export default function BookingForm({
     setSuccess(false);
 
     try {
-      const response = await fetch(`${BASE_URL}/bookings`, {
+      await api("/bookings", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        body: {
           serviceId,
-          ...formData,
-        }),
+          eventDate: formData.eventDate,
+          eventLocation: formData.eventLocation,
+          message: formData.message,
+        },
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Booking failed!");
-      }
 
       setSuccess(true);
       setMessage("Your booking has been submitted successfully!");
@@ -67,7 +59,8 @@ export default function BookingForm({
         name: "",
         email: "",
         phone: "",
-        weddingDate: "",
+        eventDate: "",
+        eventLocation: "",
         message: "",
       });
     } catch (error) {
@@ -100,61 +93,12 @@ export default function BookingForm({
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="mb-2 block text-sm font-semibold text-gray-700">
-            Your Name *
+            Event Date *
           </label>
-
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Enter your full name"
-            required
-            className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-rose-400"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-700">
-            Email Address *
-          </label>
-
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter your email"
-            required
-            className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-rose-400"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-700">
-            Phone Number *
-          </label>
-
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="Enter your phone number"
-            required
-            className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-rose-400"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-700">
-            Wedding Date *
-          </label>
-
           <input
             type="date"
-            name="weddingDate"
-            value={formData.weddingDate}
+            name="eventDate"
+            value={formData.eventDate}
             onChange={handleChange}
             min={new Date().toISOString().split("T")[0]}
             required
@@ -164,9 +108,23 @@ export default function BookingForm({
 
         <div>
           <label className="mb-2 block text-sm font-semibold text-gray-700">
+            Event Location *
+          </label>
+          <input
+            type="text"
+            name="eventLocation"
+            value={formData.eventLocation}
+            onChange={handleChange}
+            placeholder="Enter your event location"
+            required
+            className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-rose-400"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-gray-700">
             Additional Message
           </label>
-
           <textarea
             name="message"
             value={formData.message}

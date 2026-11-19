@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "../../components/layout/navbar";
+
 import BookingForm from "./booking-form";
 import { ArrowLeft, Heart, Sparkles } from "lucide-react";
 
@@ -56,7 +56,6 @@ export default function ServiceDetailsPage() {
   if (loading) {
     return (
       <>
-        <Navbar />
         <div className="flex min-h-[70vh] items-center justify-center">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 border-t-rose-500" />
         </div>
@@ -68,7 +67,6 @@ export default function ServiceDetailsPage() {
   if (error || !service) {
     return (
       <>
-        <Navbar />
         <div className="flex min-h-[70vh] flex-col items-center justify-center px-5 text-center">
           <h2 className="text-3xl font-bold text-gray-800">
             {error || "Service Not Found"}
@@ -87,8 +85,6 @@ export default function ServiceDetailsPage() {
 
   return (
     <>
-      <Navbar />
-
       <main className="min-h-screen bg-[#fffaf9]">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-rose-50 px-6 py-16 text-center md:py-24">
@@ -140,14 +136,18 @@ export default function ServiceDetailsPage() {
               <div className="absolute -bottom-4 -right-4 h-full w-full rounded-3xl border-2 border-rose-200" />
 
               <div className="relative h-[320px] overflow-hidden rounded-3xl shadow-xl md:h-[500px]">
-                <Image
-                  src={service.image}
-                  alt={service.title}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover transition duration-700 group-hover:scale-105"
-                />
+                {service.image ? (
+                  <Image
+                    src={service.image}
+                    alt={service.title}
+                    width={500}
+                    height={300}
+                  />
+                ) : (
+                  <div className="flex h-[300px] items-center justify-center bg-gray-100">
+                    No Image Available
+                  </div>
+                )}
               </div>
             </div>
 
