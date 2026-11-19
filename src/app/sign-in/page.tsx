@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { clearTokenCache } from "@/lib/api";
-import { Field } from "../../components/shared/field";
+import { Field } from "../components/shared/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { roseBtn } from "@/lib/format";

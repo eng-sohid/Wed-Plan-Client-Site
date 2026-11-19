@@ -11,50 +11,74 @@ import {
   LayoutDashboard,
   UserRound,
   LogOut,
+  ChevronDown,
 } from "lucide-react";
 
 import { useSession, signOut } from "@/lib/auth-client";
+import { clearTokenCache } from "@/lib/api";
 
 const navLinks = [
   { name: "Home", href: "/" },
-  { name: "Services", href: "/services" },
+  { name: "Browse Services", href: "/services" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
 ];
 
+function UserAvatar({
+  src,
+  name,
+  size = 36,
+}: {
+  src?: string | null;
+  name?: string | null;
+  size?: number;
+}) {
+  if (src) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        src={src}
+        alt={name || "User"}
+        style={{ width: size, height: size }}
+        className="rounded-full object-cover"
+      />
+    );
+  }
+  return (
+    <span
+      style={{ width: size, height: size }}
+      className="flex items-center justify-center rounded-full bg-[#526b50] text-sm font-semibold text-white"
+    >
+      {(name || "U").charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-
+  const [dropdown, setDropdown] = useState(false);
   const router = useRouter();
 
-  // Get logged-in user session
   const { data: session, isPending } = useSession();
+  const user = session?.user as
+    | { name: string; image?: string | null; role?: string }
+    | undefined;
+  const role = user?.role || "customer";
 
-  // Get user role
-  const role = (session?.user as { role?: string } | undefined)?.role;
+  const dashboardLink = `/dashboard/${role}`;
+  // Admin er alada profile page nei
+  const profileLink = role === "admin" ? null : `/dashboard/${role}/profile`;
 
-  // Role-based dashboard routes
-  const dashboardRoutes: Record<string, string> = {
-    customer: "/dashboard/customer",
-    vendor: "/dashboard/vendor",
-    admin: "/dashboard/admin",
+  const closeAll = () => {
+    setIsOpen(false);
+    setDropdown(false);
   };
 
-  // Role-based profile routes
-  const profileRoutes: Record<string, string> = {
-    customer: "/dashboard/customer/profile",
-    vendor: "/dashboard/vendor/profile",
-  };
-
-  const dashboardLink = role ? dashboardRoutes[role] : undefined;
-
-  const profileLink = role ? profileRoutes[role] : undefined;
-
-  // Logout
   const handleSignOut = async () => {
     try {
       await signOut();
-      setIsOpen(false);
+      clearTokenCache();
+      closeAll();
       router.push("/");
       router.refresh();
     } catch (error) {
@@ -70,7 +94,6 @@ export default function Navbar() {
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#526b50] text-white">
             <Heart size={20} strokeWidth={2} />
           </div>
-
           <span className="text-2xl font-semibold tracking-tight text-[#252820]">
             Wed<span className="text-[#526b50]">Plan.</span>
           </span>
@@ -89,57 +112,88 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Desktop Auth Buttons */}
+        {/* Desktop Auth */}
         <div className="hidden items-center gap-3 md:flex">
           {isPending ? (
             <div className="h-10 w-28 animate-pulse rounded-full bg-[#eeefe9]" />
-          ) : session && dashboardLink ? (
-            <>
-              {/* Dashboard */}
-              <Link
-                href={dashboardLink}
-                className="flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-[#526b50] transition hover:bg-[#eeefe9]"
-              >
-                <LayoutDashboard size={17} />
-                Dashboard
-              </Link>
-
-              {/* Profile */}
-              {profileLink && (
-                <Link
-                  href={profileLink}
-                  className="flex items-center gap-2 rounded-full border border-[#e8e6de] px-4 py-2.5 text-sm font-semibold text-[#526b50] transition hover:bg-[#eeefe9]"
-                >
-                  <UserRound size={17} />
-                  Profile
-                </Link>
-              )}
-
-              {/* Sign Out */}
+          ) : session && user ? (
+            <div className="relative">
               <button
-                onClick={handleSignOut}
-                className="flex items-center gap-2 rounded-full bg-[#526b50] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#40563e]"
+                onClick={() => setDropdown(!dropdown)}
+                className="flex items-center gap-2 rounded-full border border-[#e8e6de] bg-white py-1.5 pl-1.5 pr-3 transition hover:bg-[#eeefe9]"
+                aria-expanded={dropdown}
+                aria-label="User menu"
               >
-                <LogOut size={16} />
-                Sign Out
+                <UserAvatar src={user.image} name={user.name} />
+                <span className="max-w-[110px] truncate text-sm font-medium text-[#252820]">
+                  {user.name}
+                </span>
+                <ChevronDown size={16} className="text-[#55574f]" />
               </button>
-            </>
+
+              {dropdown && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setDropdown(false)}
+                  />
+                  <div className="absolute right-0 z-50 mt-2 w-60 rounded-2xl border border-[#e8e6de] bg-white p-2 shadow-lg">
+                    <div className="flex items-center gap-3 border-b border-[#e8e6de] p-3">
+                      <UserAvatar src={user.image} name={user.name} size={40} />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[#252820]">
+                          {user.name}
+                        </p>
+                        <p className="text-xs capitalize text-[#526b50]">
+                          {role}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Link
+                      href={dashboardLink}
+                      onClick={closeAll}
+                      className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-[#252820] hover:bg-[#eeefe9]"
+                    >
+                      <LayoutDashboard size={16} />
+                      Dashboard
+                    </Link>
+
+                    {profileLink && (
+                      <Link
+                        href={profileLink}
+                        onClick={closeAll}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-[#252820] hover:bg-[#eeefe9]"
+                      >
+                        <UserRound size={16} />
+                        Profile Settings
+                      </Link>
+                    )}
+
+                    <button
+                      onClick={handleSignOut}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           ) : (
             <>
-              {/* Sign In */}
               <Link
-                href="/auth/sign-in"
+                href="/sign-in"
                 className="rounded-full px-5 py-2.5 text-sm font-semibold text-[#526b50] transition hover:bg-[#eeefe9]"
               >
                 Sign In
               </Link>
-
-              {/* Get Started */}
               <Link
-                href="/auth/sign-up"
+                href="/sign-up"
                 className="flex items-center gap-2 rounded-full bg-[#526b50] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#40563e]"
               >
-                Get Started
+                Sign Up
                 <ArrowUpRight size={16} />
               </Link>
             </>
@@ -165,7 +219,7 @@ export default function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                onClick={() => setIsOpen(false)}
+                onClick={closeAll}
                 className="text-sm font-medium text-[#55574f] hover:text-[#526b50]"
               >
                 {link.name}
@@ -175,11 +229,23 @@ export default function Navbar() {
             <div className="flex flex-col gap-3 border-t border-[#e8e6de] pt-5">
               {isPending ? (
                 <div className="h-10 animate-pulse rounded-full bg-[#eeefe9]" />
-              ) : session && dashboardLink ? (
+              ) : session && user ? (
                 <>
+                  <div className="flex items-center gap-3 pb-1">
+                    <UserAvatar src={user.image} name={user.name} size={40} />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-[#252820]">
+                        {user.name}
+                      </p>
+                      <p className="text-xs capitalize text-[#526b50]">
+                        {role}
+                      </p>
+                    </div>
+                  </div>
+
                   <Link
                     href={dashboardLink}
-                    onClick={() => setIsOpen(false)}
+                    onClick={closeAll}
                     className="flex items-center gap-2 rounded-full bg-[#eeefe9] px-5 py-3 text-sm font-semibold text-[#526b50]"
                   >
                     <LayoutDashboard size={17} />
@@ -189,11 +255,11 @@ export default function Navbar() {
                   {profileLink && (
                     <Link
                       href={profileLink}
-                      onClick={() => setIsOpen(false)}
+                      onClick={closeAll}
                       className="flex items-center gap-2 rounded-full border border-[#526b50] px-5 py-3 text-sm font-semibold text-[#526b50]"
                     >
                       <UserRound size={17} />
-                      My Profile
+                      Profile Settings
                     </Link>
                   )}
 
@@ -202,25 +268,24 @@ export default function Navbar() {
                     className="flex items-center justify-center gap-2 rounded-full bg-[#526b50] px-5 py-3 text-sm font-semibold text-white"
                   >
                     <LogOut size={17} />
-                    Sign Out
+                    Logout
                   </button>
                 </>
               ) : (
                 <>
                   <Link
-                    href="/auth/sign-in"
-                    onClick={() => setIsOpen(false)}
+                    href="/sign-in"
+                    onClick={closeAll}
                     className="rounded-full border border-[#526b50] py-3 text-center text-sm font-semibold text-[#526b50]"
                   >
                     Sign In
                   </Link>
-
                   <Link
-                    href="/auth/sign-up"
-                    onClick={() => setIsOpen(false)}
+                    href="/sign-up"
+                    onClick={closeAll}
                     className="flex items-center justify-center gap-2 rounded-full bg-[#526b50] py-3 text-sm font-semibold text-white"
                   >
-                    Get Started
+                    Sign Up
                     <ArrowUpRight size={16} />
                   </Link>
                 </>

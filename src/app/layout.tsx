@@ -1,23 +1,27 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
+import Navbar from "./components/layout/navbar";
+import Footer from "./components/layout/footer";
 import "./globals.css";
-import { Geist } from "next/font/google";
-
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "WedPlan | Plan Your Perfect Wedding",
-  description:
-    "Discover trusted wedding vendors and plan your dream wedding with WedPlan.",
+  title: "WedPlan — Wedding Planning Platform",
+  description: "Discover wedding services and book trusted vendors.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className={`font-sans ${geist.variable}`}>
-      <body>{children}</body>
+    <html lang="en">
+      <body className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <Footer />
+        <Toaster richColors position="top-right" />
+      </body>
     </html>
   );
 }

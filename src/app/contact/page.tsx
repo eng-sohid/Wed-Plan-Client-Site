@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
-import Navbar from "../components/layout/navbar";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -57,8 +56,6 @@ export default function ContactPage() {
 
   return (
     <>
-      <Navbar />
-
       <main className="min-h-screen bg-white">
         <section className="bg-rose-50 px-6 py-20 text-center">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.3em] text-rose-500">

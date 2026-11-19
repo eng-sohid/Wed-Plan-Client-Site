@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Navbar from "../components/layout/navbar";
 
 type Service = {
   _id: string;
@@ -43,8 +42,6 @@ export default function ServicesPage() {
 
   return (
     <>
-      <Navbar />
-
       <main className="min-h-screen bg-white">
         <section className="bg-rose-50 px-6 py-20 text-center">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.3em] text-rose-500">
