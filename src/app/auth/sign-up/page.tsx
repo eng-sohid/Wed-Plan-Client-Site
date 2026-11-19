@@ -1,203 +1,177 @@
 "use client";
-
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-
-type UserRole = "customer" | "vendor";
+import { clearTokenCache, uploadImage, errMsg } from "@/lib/api";
+import { Field } from "../../components/shared/field";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { roseBtn } from "@/lib/format";
 
 export default function SignUpPage() {
   const router = useRouter();
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("customer");
-  const [message, setMessage] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "customer",
+    businessName: "",
+  });
+  const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const { name, email, password, role, businessName } = form;
 
-    setMessage("");
-
-    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password)) {
-      setMessage("Password must contain uppercase and lowercase letters!");
-      return;
+    if (!name.trim() || !email || !password)
+      return toast.error("Name, email and password are required");
+    if (
+      password.length < 6 ||
+      !/[A-Z]/.test(password) ||
+      !/[a-z]/.test(password)
+    ) {
+      return toast.error(
+        "Password needs 6+ characters with an uppercase and a lowercase letter",
+      );
     }
+    if (role === "vendor" && !businessName.trim())
+      return toast.error("Business name is required for vendors");
 
     setLoading(true);
-
     try {
+      let image: string | undefined;
+      if (file) image = await uploadImage(file);
+
       const { error } = await authClient.signUp.email({
-        name,
+        name: name.trim(),
         email,
         password,
+        image,
         fetchOptions: {
-          body: { role },
+          body: {
+            role,
+            businessName: role === "vendor" ? businessName.trim() : undefined,
+          },
         },
       });
+      if (error) throw new Error(error.message || "Registration failed");
 
-      if (error) {
-        setMessage(error.message || "Registration failed!");
-        return;
-      }
-
-      router.push(
-        role === "vendor" ? "/dashboard/vendor" : "/dashboard/customer",
-      );
-
+      clearTokenCache();
+      toast.success("Account created successfully!");
+      router.replace("/dashboard");
       router.refresh();
-    } catch {
-      setMessage("Something went wrong!");
+    } catch (err) {
+      toast.error(errMsg(err));
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleSignUp = async () => {
-    setMessage("Google registration role selection will be connected next.");
-  };
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-rose-50 px-4 py-10">
-      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-xl">
-        <h1 className="text-center text-3xl font-bold text-gray-900">
-          Create Account
-        </h1>
-
-        <p className="mt-2 text-center text-gray-500">
-          Join WedPlan and plan your special day.
-        </p>
-
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-          <div>
-            <label className="mb-2 block font-medium text-gray-700">
-              Full Name
-            </label>
-
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
-              required
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-rose-400"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block font-medium text-gray-700">
-              Email Address
-            </label>
-
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-rose-400"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block font-medium text-gray-700">
-              Password
-            </label>
-
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create a password"
-              minLength={6}
-              required
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-rose-400"
-            />
-
-            <p className="mt-1 text-xs text-gray-400">
-              Minimum 6 characters, including uppercase and lowercase letters.
-            </p>
-          </div>
-
-          {/* Account Type */}
-
-          <div>
-            <label className="mb-3 block font-semibold text-gray-700">
-              Choose Account Type
-            </label>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setRole("customer")}
-                className={`rounded-xl border p-4 text-left transition ${
-                  role === "customer"
-                    ? "border-rose-500 bg-rose-50 text-rose-600"
-                    : "border-gray-200 text-gray-600 hover:border-rose-300"
-                }`}
-              >
-                <span className="block font-bold">Customer</span>
-                <span className="mt-1 block text-xs">
-                  Find and book services
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole("vendor")}
-                className={`rounded-xl border p-4 text-left transition ${
-                  role === "vendor"
-                    ? "border-rose-500 bg-rose-50 text-rose-600"
-                    : "border-gray-200 text-gray-600 hover:border-rose-300"
-                }`}
-              >
-                <span className="block font-bold">Vendor</span>
-                <span className="mt-1 block text-xs">
-                  Provide wedding services
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {message && (
-            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
-              {message}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-xl bg-rose-500 py-3 font-semibold text-white transition hover:bg-rose-600 disabled:opacity-50"
-          >
-            {loading ? "Creating Account..." : "Sign Up"}
-          </button>
-        </form>
-
-        <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-gray-200" />
-          <span className="text-sm text-gray-400">OR</span>
-          <div className="h-px flex-1 bg-gray-200" />
+    <div className="mx-auto flex min-h-[75vh] max-w-md items-center px-4 py-10">
+      <div className="w-full space-y-5 rounded-2xl border bg-white p-8 shadow-sm">
+        <div className="text-center">
+          <h1 className="font-serif text-3xl font-bold">Create Account</h1>
+          <p className="mt-1 text-sm text-gray-500">Join WedPlan today</p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleGoogleSignUp}
-          className="w-full rounded-xl border border-gray-200 py-3 font-semibold text-gray-700 hover:bg-gray-50"
+        <form onSubmit={submit} className="space-y-4">
+          <Field label="Full Name">
+            <Input
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+          </Field>
+          <Field label="Email">
+            <Input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </Field>
+          <Field label="Password">
+            <Input
+              type="password"
+              placeholder="Min 6 chars, upper & lower case"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+            />
+          </Field>
+
+          <Field label="Account Role">
+            <div className="grid grid-cols-2 gap-3">
+              {["customer", "vendor"].map((r) => (
+                <button
+                  type="button"
+                  key={r}
+                  onClick={() => setForm({ ...form, role: r })}
+                  className={`rounded-lg border p-2.5 text-sm font-medium capitalize ${form.role === r ? "border-rose-500 bg-rose-50 text-rose-700" : "hover:bg-gray-50"}`}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          {form.role === "vendor" && (
+            <Field label="Business Name">
+              <Input
+                value={form.businessName}
+                onChange={(e) =>
+                  setForm({ ...form, businessName: e.target.value })
+                }
+              />
+            </Field>
+          )}
+
+          <Field label="Profile Image (optional)">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+            />
+          </Field>
+
+          <Button
+            type="submit"
+            disabled={loading}
+            className={`w-full ${roseBtn}`}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating account...
+              </>
+            ) : (
+              "Sign Up"
+            )}
+          </Button>
+        </form>
+
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() =>
+            authClient.signIn.social({
+              provider: "google",
+              callbackURL: "/dashboard",
+            })
+          }
         >
           Continue with Google
-        </button>
+        </Button>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Already have an account?{" "}
+        <p className="text-center text-sm text-gray-500">
+          Already registered?{" "}
           <Link
             href="/sign-in"
-            className="font-semibold text-rose-500 hover:underline"
+            className="font-medium text-rose-600 hover:underline"
           >
-            Sign In
+            Sign in
           </Link>
         </p>
       </div>
