@@ -1,3 +1,4 @@
+import Categories from "./components/home/categories";
 import CTASection from "./components/home/cta-section";
 import FeaturedServices from "./components/home/featured-services";
 import HeroSection from "./components/home/hero-section";
@@ -10,6 +11,7 @@ export default function Home() {
     <>
       <HeroSection />
       <FeaturedServices />
+      <Categories />
       <WhyChooseUs />
       <HowItWorks />
       <Testimonials />
