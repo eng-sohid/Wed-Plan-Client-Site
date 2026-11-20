@@ -1,17 +1,44 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
+import { attachDatabasePool } from "@vercel/functions";
 
-const client = new MongoClient(process.env.MONGO_DB_URL!);
+const uri = process.env.MONGO_DB_URL as string;
+
+// Ek instance e ekta-i client
+const globalForMongo = globalThis as unknown as { _mongoClient?: MongoClient };
+
+const client =
+  globalForMongo._mongoClient ??
+  new MongoClient(uri, {
+    maxPoolSize: 5,
+    serverSelectionTimeoutMS: 8000,
+    connectTimeoutMS: 8000,
+    maxIdleTimeMS: 5000,
+    retryReads: true,
+    retryWrites: true,
+  });
+
+globalForMongo._mongoClient = client;
+attachDatabasePool(client);
+
+const db = client.db(process.env.DB_NAME || "wedplan");
 
 export const auth = betterAuth({
-  database: mongodbAdapter(client.db("wedplan"), {
-    client,
-  }),
+  // `{ client }` deowa hocche na: transaction lagbe na
+  database: mongodbAdapter(db),
 
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 6,
+  },
+
+  // Prottek request e database na dhore cookie theke session pore
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
   },
 
   user: {
@@ -22,6 +49,8 @@ export const auth = betterAuth({
         defaultValue: "customer",
         input: true,
       },
+      businessName: { type: "string", required: false, input: true },
+      phone: { type: "string", required: false, input: true },
     },
   },
 
@@ -33,7 +62,6 @@ export const auth = betterAuth({
           if (Object.prototype.hasOwnProperty.call(data, "role")) {
             return false;
           }
-
           return { data };
         },
       },
