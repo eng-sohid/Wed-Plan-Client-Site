@@ -14,14 +14,19 @@ export function Avatar({
         src={src}
         alt={name || "avatar"}
         style={{ width: size, height: size }}
-        className="rounded-full object-cover"
+        className="shrink-0 rounded-full border border-[#d8b68c]/30 object-cover"
       />
     );
   }
+
   return (
     <span
-      style={{ width: size, height: size, fontSize: size / 2.4 }}
-      className="inline-flex shrink-0 items-center justify-center rounded-full bg-rose-100 font-semibold text-rose-700"
+      style={{
+        width: size,
+        height: size,
+        fontSize: size / 2.4,
+      }}
+      className="inline-flex shrink-0 items-center justify-center rounded-full border border-[#d8b68c]/30 bg-[#d8b68c]/10 font-semibold text-[#d8b68c]"
     >
       {(name || "?").charAt(0).toUpperCase()}
     </span>

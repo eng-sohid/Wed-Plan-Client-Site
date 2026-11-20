@@ -1,21 +1,23 @@
 "use client";
+
 import { useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Crown, ArrowUpRight } from "lucide-react";
 import { api, errMsg } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { roseBtn } from "@/lib/format";
 
 export default function UpgradeButton() {
   const [loading, setLoading] = useState(false);
 
   async function upgrade() {
     setLoading(true);
+
     try {
       const data = await api<{ url: string }>(
         "/payments/create-checkout-session",
         { method: "POST" },
       );
+
       window.location.href = data.url;
     } catch (e) {
       toast.error(errMsg(e));
@@ -27,7 +29,7 @@ export default function UpgradeButton() {
     <Button
       onClick={upgrade}
       disabled={loading}
-      className={`w-full ${roseBtn}`}
+      className="group h-12 w-full rounded-xl border border-[#d8b68c]/30 bg-[#d8b68c] font-semibold text-[#171815] shadow-lg shadow-[#d8b68c]/10 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#e8c9a3] hover:shadow-[#d8b68c]/20 disabled:opacity-60"
     >
       {loading ? (
         <>
@@ -35,7 +37,11 @@ export default function UpgradeButton() {
           Redirecting to Stripe...
         </>
       ) : (
-        "Upgrade to Premium"
+        <>
+          <Crown className="mr-2 h-4 w-4" />
+          Upgrade to Premium
+          <ArrowUpRight className="ml-auto h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </>
       )}
     </Button>
   );

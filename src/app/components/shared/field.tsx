@@ -9,8 +9,11 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
+    <div className="space-y-2">
+      <Label className="text-xs font-semibold uppercase tracking-[0.14em] text-white/60">
+        {label}
+      </Label>
+
       {children}
     </div>
   );

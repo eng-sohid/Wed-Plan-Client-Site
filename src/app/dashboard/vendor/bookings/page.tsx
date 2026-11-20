@@ -1,9 +1,21 @@
 "use client";
+
 import { toast } from "sonner";
+import {
+  CalendarDays,
+  MapPin,
+  BriefcaseBusiness,
+  MessageSquare,
+  Check,
+  X,
+  Mail,
+} from "lucide-react";
+
 import { api, errMsg } from "@/lib/api";
 import { useApi } from "../../../hooks/use-api";
 import type { Booking } from "../../../types";
 import { fmtDate } from "@/lib/format";
+
 import { PageTitle } from "../../../components/shared/page-title";
 import { QueryState, EmptyState } from "../../../components/shared/query-state";
 import { StatusBadge } from "../../../components/shared/status-badge";
@@ -11,9 +23,9 @@ import { Avatar } from "../../../components/shared/avatar";
 import { Button } from "@/components/ui/button";
 
 export default function VendorBookingsPage() {
-  const { data, loading, error, reload } = useApi<{ bookings: Booking[] }>(
-    "/vendor/bookings",
-  );
+  const { data, loading, error, reload } = useApi<{
+    bookings: Booking[];
+  }>("/vendor/bookings");
 
   async function act(id: string, status: "accepted" | "rejected") {
     try {
@@ -21,6 +33,7 @@ export default function VendorBookingsPage() {
         method: "PATCH",
         body: { status },
       });
+
       toast.success(`Booking ${status}`);
       reload();
     } catch (e) {
@@ -29,75 +42,135 @@ export default function VendorBookingsPage() {
   }
 
   return (
-    <div>
+    <div className="space-y-7">
       <PageTitle
         title="Booking Requests"
-        subtitle="Review requests from customers"
+        subtitle="Review customer requests and manage your upcoming wedding events."
       />
+
       <QueryState loading={loading} error={error} onRetry={reload}>
         {data?.bookings.length ? (
           <div className="space-y-4">
             {data.bookings.map((b) => (
-              <div
+              <article
                 key={b._id}
-                className="rounded-2xl border bg-white p-5 shadow-sm"
+                className="rounded-2xl border border-white/[0.08] bg-[#20211e] p-5 transition hover:border-[#d8b68c]/25 sm:p-6"
               >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 items-center gap-3">
                     <Avatar
                       src={b.customerImage}
                       name={b.customerName}
-                      size={44}
+                      size={48}
                     />
-                    <div>
-                      <p className="font-semibold">{b.customerName}</p>
-                      <p className="text-xs text-gray-500">{b.customerEmail}</p>
+
+                    <div className="min-w-0">
+                      <h3 className="truncate font-semibold text-[#faf9f6]">
+                        {b.customerName}
+                      </h3>
+
+                      <p className="mt-1 flex items-center gap-1.5 text-xs text-white/40">
+                        <Mail size={13} />
+                        <span className="truncate">{b.customerEmail}</span>
+                      </p>
                     </div>
                   </div>
-                  <StatusBadge status={b.status} />
+
+                  <div className="flex items-center">
+                    <StatusBadge status={b.status} />
+                  </div>
                 </div>
-                <div className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
-                  <p>
-                    <span className="text-gray-500">Service:</span>{" "}
-                    {b.serviceName}
-                  </p>
-                  <p>
-                    <span className="text-gray-500">Event Date:</span>{" "}
-                    {fmtDate(b.eventDate)}
-                  </p>
-                  <p>
-                    <span className="text-gray-500">Location:</span>{" "}
-                    {b.eventLocation}
-                  </p>
+
+                <div className="mt-5 grid gap-3 rounded-xl border border-white/[0.06] bg-[#171815] p-4 sm:grid-cols-3">
+                  <div className="flex items-start gap-3">
+                    <BriefcaseBusiness
+                      size={17}
+                      className="mt-0.5 shrink-0 text-[#d8b68c]"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-white/35">
+                        Service
+                      </p>
+                      <p className="mt-1 break-words text-sm font-medium text-white/85">
+                        {b.serviceName}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <CalendarDays
+                      size={17}
+                      className="mt-0.5 shrink-0 text-[#d8b68c]"
+                    />
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-white/35">
+                        Event Date
+                      </p>
+                      <p className="mt-1 text-sm font-medium text-white/85">
+                        {fmtDate(b.eventDate)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <MapPin
+                      size={17}
+                      className="mt-0.5 shrink-0 text-[#d8b68c]"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-white/35">
+                        Location
+                      </p>
+                      <p className="mt-1 break-words text-sm font-medium text-white/85">
+                        {b.eventLocation}
+                      </p>
+                    </div>
+                  </div>
                 </div>
+
                 {b.message && (
-                  <p className="mt-3 rounded-lg bg-rose-50 p-3 text-sm text-gray-700">
-                    “{b.message}”
-                  </p>
+                  <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.025] p-4">
+                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#d8b68c]">
+                      <MessageSquare size={14} />
+                      Customer Message
+                    </div>
+
+                    <p className="text-sm leading-6 text-white/60">
+                      “{b.message}”
+                    </p>
+                  </div>
                 )}
+
                 {b.status === "pending" && (
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-5 flex flex-wrap gap-2 border-t border-white/[0.07] pt-4">
                     <Button
                       size="sm"
-                      className="bg-green-600 text-white hover:bg-green-700"
                       onClick={() => act(b._id, "accepted")}
+                      className="bg-[#d8b68c] text-[#171815] hover:bg-[#e7c9a3]"
                     >
-                      Accept
+                      <Check size={15} className="mr-1.5" />
+                      Accept Request
                     </Button>
+
                     <Button
                       size="sm"
-                      variant="destructive"
+                      variant="outline"
                       onClick={() => act(b._id, "rejected")}
+                      className="border-red-400/20 bg-red-400/[0.05] text-red-400 hover:bg-red-400/10 hover:text-red-300"
                     >
+                      <X size={15} className="mr-1.5" />
                       Reject
                     </Button>
                   </div>
                 )}
-              </div>
+              </article>
             ))}
           </div>
         ) : (
-          <EmptyState title="No booking requests yet" />
+          <EmptyState
+            title="No booking requests yet"
+            text="When customers book your services, their requests will appear here."
+          />
         )}
       </QueryState>
     </div>

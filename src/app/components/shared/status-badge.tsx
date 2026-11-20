@@ -1,19 +1,23 @@
 const colors: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-700",
-  approved: "bg-green-100 text-green-700",
-  accepted: "bg-green-100 text-green-700",
-  paid: "bg-green-100 text-green-700",
-  rejected: "bg-red-100 text-red-700",
-  cancelled: "bg-gray-200 text-gray-700",
-  expired: "bg-gray-200 text-gray-700",
-  failed: "bg-red-100 text-red-700",
+  pending: "border-amber-400/20 bg-amber-400/10 text-amber-300",
+  approved: "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
+  accepted: "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
+  paid: "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
+  rejected: "border-red-400/20 bg-red-400/10 text-red-300",
+  cancelled: "border-white/10 bg-white/5 text-white/50",
+  expired: "border-white/10 bg-white/5 text-white/50",
+  failed: "border-red-400/20 bg-red-400/10 text-red-300",
 };
 
 export function StatusBadge({ status }: { status: string }) {
   return (
     <span
-      className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${colors[status] || "bg-gray-100 text-gray-700"}`}
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${
+        colors[status.toLowerCase()] ||
+        "border-white/10 bg-white/5 text-white/60"
+      }`}
     >
+      <span className="mr-2 h-1.5 w-1.5 rounded-full bg-current" />
       {status}
     </span>
   );
