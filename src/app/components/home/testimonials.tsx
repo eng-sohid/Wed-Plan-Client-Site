@@ -26,54 +26,79 @@ const testimonials = [
 
 export default function Testimonials() {
   return (
-    <section className="bg-rose-50/60 px-6 py-20 md:px-12 lg:px-20">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-14 text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.3em] text-rose-500">
-            Testimonials
-          </p>
+    <section className="relative overflow-hidden bg-[#171815] px-5 py-24 sm:px-8 lg:py-32">
+      <div className="pointer-events-none absolute -right-40 top-10 h-96 w-96 rounded-full bg-[#526b50]/10 blur-[120px]" />
 
-          <h2 className="text-3xl font-bold text-gray-900 md:text-5xl">
-            Love Stories & Happy Couples
+      <div className="relative mx-auto max-w-7xl">
+        <div className="mb-16 text-center">
+          <div className="mb-5 flex items-center justify-center gap-3">
+            <span className="h-px w-10 bg-[#d8b68c]" />
+            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-[#d8b68c]">
+              Testimonials
+            </span>
+            <span className="h-px w-10 bg-[#d8b68c]" />
+          </div>
+
+          <h2 className="font-serif text-4xl leading-tight text-[#faf9f6] sm:text-5xl lg:text-6xl">
+            Love Stories &
+            <span className="block italic text-[#d8b68c]">Happy Couples.</span>
           </h2>
 
-          <p className="mx-auto mt-4 max-w-2xl leading-7 text-gray-500">
-            Don&apos;t just take our word for it. Hear what our happy couples have to
-            say about their experience with us.
+          <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-white/50 sm:text-base">
+            Don&apos;t just take our word for it. Hear what our happy couples
+            have to say about their experience with us.
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((item) => (
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {testimonials.map((item, index) => (
             <div
               key={item.name}
-              className="rounded-2xl bg-white p-8 shadow-sm transition duration-300 hover:-translate-y-2 hover:shadow-xl"
+              className="group relative flex flex-col border border-white/10 bg-[#20211e] p-7 transition-all duration-500 hover:-translate-y-2 hover:border-[#d8b68c]/50 hover:bg-[#252720] sm:p-9"
             >
-              <div className="mb-5 flex items-center justify-between">
-                <Quote size={35} className="text-rose-300" />
+              <div className="mb-7 flex items-center justify-between">
+                <Quote
+                  size={38}
+                  strokeWidth={1.2}
+                  className="text-[#d8b68c]/70 transition-colors group-hover:text-[#d8b68c]"
+                />
 
-                <div className="flex gap-1 text-amber-400">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <Star key={index} size={17} fill="currentColor" />
-                  ))}
-                </div>
+                <span className="font-serif text-sm text-white/20">
+                  0{index + 1}
+                </span>
               </div>
 
-              <p className="min-h-28 text-sm leading-7 text-gray-600">
-                &quot;{item.review}&quot;
+              <div className="mb-5 flex gap-1 text-[#d8b68c]">
+                {Array.from({ length: 5 }).map((_, starIndex) => (
+                  <Star
+                    key={starIndex}
+                    size={15}
+                    fill="currentColor"
+                    strokeWidth={1}
+                  />
+                ))}
+              </div>
+
+              <p className="flex-1 text-sm leading-8 text-white/65">
+                &ldquo;{item.review}&rdquo;
               </p>
 
-              <div className="mt-7 flex items-center gap-4 border-t border-gray-100 pt-6">
+              <div className="mt-8 flex items-center gap-4 border-t border-white/10 pt-6">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="h-12 w-12 rounded-full object-cover"
+                  className="h-12 w-12 rounded-full border border-[#d8b68c]/40 object-cover"
                 />
 
                 <div>
-                  <h3 className="font-bold text-gray-900">{item.name}</h3>
+                  <h3 className="font-serif text-lg text-[#faf9f6]">
+                    {item.name}
+                  </h3>
 
-                  <p className="mt-1 text-xs text-gray-500">{item.role}</p>
+                  <p className="mt-1 text-[11px] uppercase tracking-[0.15em] text-white/40">
+                    {item.role}
+                  </p>
                 </div>
               </div>
             </div>
