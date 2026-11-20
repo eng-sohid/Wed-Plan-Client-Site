@@ -117,7 +117,7 @@ export default function DashboardShell({
 
   return (
     <div className="mx-auto flex max-w-7xl">
-      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 border-r bg-white lg:block">
+      <aside className="sticky top-[76px] hidden h-[calc(100vh-76px)] w-64 shrink-0 border-r bg-white lg:block">
         {sidebar}
       </aside>
 
