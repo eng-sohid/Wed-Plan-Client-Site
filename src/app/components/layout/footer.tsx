@@ -1,12 +1,30 @@
 import Link from "next/link";
 import { Heart, Mail, Phone, MapPin, ArrowUpRight } from "lucide-react";
 
+const quickLinks = [
+  { label: "Home", href: "/" },
+  { label: "Browse Services", href: "/services" },
+  { label: "About Us", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];
+
+const services = [
+  "Wedding Photography",
+  "Wedding Venues",
+  "Bridal Makeup",
+  "Catering Services",
+  "Wedding Decoration",
+  "Wedding Planning",
+];
+
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-[#171815] px-6 pt-20 text-[#faf9f6] md:px-12 lg:px-20">
+    <footer className="relative overflow-hidden border-t border-white/[0.08] bg-[#171815] px-6 pt-16 text-[#faf9f6] md:px-12 md:pt-20 lg:px-20">
+      {/* Background Decoration */}
       <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-[#526b50]/10 blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-[#d8b68c]/[0.04] blur-[100px]" />
 
-      <div className="relative mx-auto grid max-w-7xl gap-14 pb-16 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
+      <div className="relative mx-auto grid max-w-7xl gap-12 pb-14 sm:grid-cols-2 lg:grid-cols-4 lg:gap-14">
         {/* Brand */}
         <div>
           <Link
@@ -16,40 +34,47 @@ export default function Footer() {
             WedPlan
             <Heart
               size={21}
-              className="text-[#d8b68c] transition-transform duration-300 group-hover:scale-110"
+              className="text-[#d8b68c] transition-transform duration-300 group-hover:scale-125"
               fill="currentColor"
             />
           </Link>
 
-          <p className="mt-6 max-w-xs text-sm leading-8 text-white/50">
+          <p className="mt-6 max-w-xs text-sm leading-8 text-white/45">
             Making your dream wedding a beautiful reality. We bring your love
             story to life with unforgettable celebrations.
           </p>
 
+          {/* Social Links */}
           <div className="mt-7 flex gap-3">
-            <Link
+            <a
               href="https://facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Facebook"
-              className="flex h-10 w-10 items-center justify-center border border-white/10 text-sm font-semibold text-white/60 transition hover:border-[#d8b68c]/50 hover:bg-[#d8b68c] hover:text-[#171815]"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-sm font-semibold text-white/60 transition-all duration-300 hover:border-[#d8b68c] hover:bg-[#d8b68c] hover:text-[#171815]"
             >
               f
-            </Link>
+            </a>
 
-            <Link
+            <a
               href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Instagram"
-              className="flex h-10 w-10 items-center justify-center text-lg border border-white/10 text-white/60 transition hover:border-[#d8b68c]/50 hover:bg-[#d8b68c] hover:text-[#171815]"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-lg text-white/60 transition-all duration-300 hover:border-[#d8b68c] hover:bg-[#d8b68c] hover:text-[#171815]"
             >
               ◎
-            </Link>
+            </a>
 
-            <Link
-              href="https://twitter.com"
-              aria-label="Twitter"
-              className="flex h-10 w-10 items-center justify-center border border-white/10 text-sm font-semibold text-white/60 transition hover:border-[#d8b68c]/50 hover:bg-[#d8b68c] hover:text-[#171815]"
+            <a
+              href="https://x.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="X"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-sm font-semibold text-white/60 transition-all duration-300 hover:border-[#d8b68c] hover:bg-[#d8b68c] hover:text-[#171815]"
             >
               X
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -59,22 +84,17 @@ export default function Footer() {
             Quick Links
           </h3>
 
-          <ul className="space-y-4 text-sm text-white/50">
-            {[
-              { label: "Home", href: "/" },
-              { label: "Services", href: "/services" },
-              { label: "About Us", href: "/about" },
-              { label: "Contact", href: "/contact" },
-            ].map((item) => (
+          <ul className="space-y-4 text-sm text-white/45">
+            {quickLinks.map((item) => (
               <li key={item.label}>
                 <Link
                   href={item.href}
-                  className="group inline-flex items-center gap-2 transition hover:text-[#d8b68c]"
+                  className="group inline-flex items-center gap-2 transition-colors duration-300 hover:text-[#d8b68c]"
                 >
                   <span>{item.label}</span>
                   <ArrowUpRight
                     size={13}
-                    className="opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100"
+                    className="opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
                   />
                 </Link>
               </li>
@@ -88,20 +108,15 @@ export default function Footer() {
             Our Services
           </h3>
 
-          <ul className="space-y-4 text-sm text-white/50">
-            {[
-              "Wedding Photography",
-              "Wedding Venues",
-              "Bridal Makeup",
-              "Catering Services",
-              "Wedding Decoration",
-              "Wedding Planning",
-            ].map((service) => (
-              <li
-                key={service}
-                className="transition hover:translate-x-1 hover:text-[#d8b68c]"
-              >
-                {service}
+          <ul className="space-y-4 text-sm text-white/45">
+            {services.map((service) => (
+              <li key={service}>
+                <Link
+                  href="/services"
+                  className="inline-block transition-all duration-300 hover:translate-x-1 hover:text-[#d8b68c]"
+                >
+                  {service}
+                </Link>
               </li>
             ))}
           </ul>
@@ -111,7 +126,7 @@ export default function Footer() {
         <div>
           <h3 className="mb-7 font-serif text-xl text-[#faf9f6]">Contact Us</h3>
 
-          <ul className="space-y-6 text-sm text-white/50">
+          <ul className="space-y-6 text-sm text-white/45">
             <li className="flex items-start gap-3">
               <MapPin size={18} className="mt-0.5 shrink-0 text-[#d8b68c]" />
               <span>Dhaka, Bangladesh</span>
@@ -131,7 +146,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="relative border-t border-white/10 py-7">
+      <div className="relative border-t border-white/[0.08] py-7">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
           <p className="text-xs tracking-wide text-white/35">
             © {new Date().getFullYear()} WedPlan. All rights reserved.

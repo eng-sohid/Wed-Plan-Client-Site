@@ -48,7 +48,7 @@ function UserAvatar({
   return (
     <span
       style={{ width: size, height: size }}
-      className="flex items-center justify-center rounded-full bg-[#c9a77c] text-sm font-semibold text-black"
+      className="flex items-center justify-center rounded-full bg-[#d8b68c] text-sm font-semibold text-[#171815]"
     >
       {(name || "U").charAt(0).toUpperCase()}
     </span>
@@ -64,15 +64,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const isHome = pathname === "/";
 
-  // Home e hero er upor transparent, scroll korle solid hoye jay
-  const dark = isHome && !scrolled;
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   const { data: session, isPending } = useSession();
 
   const user = session?.user as
@@ -80,9 +71,31 @@ export default function Navbar() {
     | undefined;
 
   const role = user?.role || "customer";
+
   const dashboardLink = `/dashboard/${role}`;
-  // Admin er alada profile page nei
+
   const profileLink = role === "admin" ? null : `/dashboard/${role}/profile`;
+
+  // Customer and logged-out users see all public links.
+  // Vendor and admin users only see Home and Browse Services.
+  const visibleNavLinks =
+    session && (role === "vendor" || role === "admin")
+      ? navLinks.filter(
+          (link) => link.href !== "/about" && link.href !== "/contact",
+        )
+      : navLinks;
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+
+    onScroll();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const closeAll = () => {
     setIsOpen(false);
@@ -101,24 +114,24 @@ export default function Navbar() {
     }
   };
 
+  const transparent = isHome && !scrolled;
+
+  const textColor = "text-[#faf9f6]";
+  const mutedColor = "text-white/65";
+  const hoverItem = "hover:bg-white/10";
+  const skeleton = "bg-white/10";
+
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
-
-  // Theme-aware classes
-  const textColor = dark ? "text-white" : "text-[#28251f]";
-  const mutedColor = dark ? "text-white/70" : "text-[#77736b]";
-  const hoverItem = dark ? "hover:bg-white/10" : "hover:bg-[#f0ede6]";
-  const divider = dark ? "border-white/10" : "border-[#eeeae3]";
-  const skeleton = dark ? "bg-white/10" : "bg-[#eeefe9]";
 
   return (
     <header
       className={`${
-        isHome ? "fixed inset-x-0 top-0" : "sticky top-0"
-      } z-50 w-full transition-colors duration-300 ${
-        dark
-          ? "bg-transparent"
-          : "border-b border-[#e8e2d9] bg-[#faf9f6]/95 backdrop-blur-xl"
+        isHome ? "fixed" : "sticky"
+      } inset-x-0 top-0 z-50 w-full border-b transition-all duration-300 ${
+        transparent
+          ? "border-transparent bg-transparent"
+          : "border-white/10 bg-[#171815]/95 shadow-lg shadow-black/10 backdrop-blur-xl"
       }`}
     >
       <nav className="mx-auto flex h-[76px] max-w-[1600px] items-center justify-between px-5 sm:px-8 lg:px-14">
@@ -128,40 +141,31 @@ export default function Navbar() {
           onClick={closeAll}
           className="group flex items-center gap-2"
         >
-          <span
-            className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-              dark
-                ? "border border-white/40 text-white group-hover:bg-white group-hover:text-black"
-                : "bg-[#526b50] text-white"
-            }`}
-          >
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d8b68c]/60 text-[#d8b68c] transition group-hover:bg-[#d8b68c] group-hover:text-[#171815]">
             <Heart size={17} strokeWidth={1.8} />
           </span>
 
-          <span
-            className={`font-serif text-xl font-bold tracking-tight sm:text-2xl ${textColor}`}
-          >
-            WedPlan<span className="text-[#c9a77c]">.</span>
+          <span className="font-serif text-xl font-bold tracking-tight text-[#faf9f6] sm:text-2xl">
+            WedPlan<span className="text-[#d8b68c]">.</span>
           </span>
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-8 lg:flex">
-          {navLinks.map((link) => (
+          {visibleNavLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
               className={`relative py-2 text-[12px] font-medium tracking-wide transition-colors ${
                 isActive(link.href)
-                  ? dark
-                    ? "text-[#d8b68c]"
-                    : "text-[#526b50]"
-                  : `${mutedColor} hover:text-[#c9a77c]`
+                  ? "text-[#d8b68c]"
+                  : `${mutedColor} hover:text-[#d8b68c]`
               }`}
             >
               {link.name}
+
               {isActive(link.href) && (
-                <span className="absolute bottom-0 left-0 h-px w-full bg-[#c9a77c]" />
+                <span className="absolute bottom-0 left-0 h-px w-full bg-[#d8b68c]" />
               )}
             </Link>
           ))}
@@ -177,20 +181,18 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setDropdown(!dropdown)}
-                className={`flex items-center gap-2 rounded-full border px-2 py-1.5 transition ${
-                  dark
-                    ? "border-white/30 bg-black/20 hover:bg-white/10"
-                    : "border-[#e8e2d9] bg-white hover:bg-[#f0ede6]"
-                }`}
+                className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-2 py-1.5 transition hover:bg-white/10"
                 aria-expanded={dropdown}
                 aria-label="User menu"
               >
                 <UserAvatar src={user.image} name={user.name} />
+
                 <span
                   className={`max-w-[100px] truncate text-xs font-medium ${textColor}`}
                 >
                   {user.name}
                 </span>
+
                 <ChevronDown size={15} className={mutedColor} />
               </button>
 
@@ -201,22 +203,16 @@ export default function Navbar() {
                     onClick={() => setDropdown(false)}
                   />
 
-                  <div
-                    className={`absolute right-0 z-50 mt-3 w-64 overflow-hidden rounded-2xl border p-2 shadow-2xl ${
-                      dark
-                        ? "border-white/10 bg-[#171816] text-white"
-                        : "border-[#e8e2d9] bg-white text-[#28251f]"
-                    }`}
-                  >
-                    <div
-                      className={`flex items-center gap-3 border-b p-3 ${divider}`}
-                    >
+                  <div className="absolute right-0 z-50 mt-3 w-64 overflow-hidden rounded-2xl border border-white/10 bg-[#20211e] p-2 text-[#faf9f6] shadow-2xl">
+                    <div className="flex items-center gap-3 border-b border-white/10 p-3">
                       <UserAvatar src={user.image} name={user.name} size={42} />
+
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold">
                           {user.name}
                         </p>
-                        <p className="mt-1 text-xs capitalize text-[#c9a77c]">
+
+                        <p className="mt-1 text-xs capitalize text-[#d8b68c]">
                           {role}
                         </p>
                       </div>
@@ -244,7 +240,7 @@ export default function Navbar() {
 
                     <button
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-red-500 transition hover:bg-red-500/10"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-red-400 transition hover:bg-red-500/10"
                     >
                       <LogOut size={17} />
                       Logout
@@ -257,14 +253,14 @@ export default function Navbar() {
             <>
               <Link
                 href="/sign-in"
-                className={`px-4 py-2 text-xs font-medium tracking-wide transition hover:text-[#c9a77c] ${textColor}`}
+                className="px-4 py-2 text-xs font-medium tracking-wide text-[#faf9f6] transition hover:text-[#d8b68c]"
               >
                 SIGN IN
               </Link>
 
               <Link
                 href="/sign-up"
-                className="group flex items-center gap-2 rounded-full bg-[#c9a77c] px-5 py-3 text-xs font-semibold tracking-wide text-[#171816] transition hover:bg-[#b8966b]"
+                className="group flex items-center gap-2 rounded-full bg-[#d8b68c] px-5 py-3 text-xs font-semibold tracking-wide text-[#171815] transition hover:bg-[#c9a77c]"
               >
                 SIGN UP
                 <ArrowUpRight
@@ -279,11 +275,7 @@ export default function Navbar() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`flex h-10 w-10 items-center justify-center rounded-full border transition md:hidden ${
-            dark
-              ? "border-white/40 text-white"
-              : "border-[#e8e2d9] text-[#28251f]"
-          }`}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-[#faf9f6] transition hover:bg-white/10 md:hidden"
           aria-label={isOpen ? "Close menu" : "Open menu"}
           aria-expanded={isOpen}
         >
@@ -293,41 +285,35 @@ export default function Navbar() {
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div
-          className={`absolute left-0 top-full w-full border-t px-6 py-7 shadow-2xl md:hidden ${
-            dark
-              ? "border-white/10 bg-[#111310] text-white"
-              : "border-[#e8e2d9] bg-[#faf9f6] text-[#28251f]"
-          }`}
-        >
+        <div className="absolute left-0 top-full w-full border-t border-white/10 bg-[#171815] px-6 py-7 text-[#faf9f6] shadow-2xl md:hidden">
           <div className="flex flex-col gap-5">
-            {navLinks.map((link) => (
+            {visibleNavLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={closeAll}
-                className={`text-sm font-medium transition hover:text-[#c9a77c] ${
-                  isActive(link.href) ? "text-[#c9a77c]" : ""
+                className={`text-sm font-medium transition hover:text-[#d8b68c] ${
+                  isActive(link.href) ? "text-[#d8b68c]" : ""
                 }`}
               >
                 {link.name}
               </Link>
             ))}
 
-            <div className={`flex flex-col gap-3 border-t pt-5 ${divider}`}>
+            <div className="flex flex-col gap-3 border-t border-white/10 pt-5">
               {isPending ? (
-                <div
-                  className={`h-10 animate-pulse rounded-full ${skeleton}`}
-                />
+                <div className="h-10 animate-pulse rounded-full bg-white/10" />
               ) : session && user ? (
                 <>
                   <div className="flex items-center gap-3 pb-2">
                     <UserAvatar src={user.image} name={user.name} size={42} />
+
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold">
                         {user.name}
                       </p>
-                      <p className="text-xs capitalize text-[#c9a77c]">
+
+                      <p className="text-xs capitalize text-[#d8b68c]">
                         {role}
                       </p>
                     </div>
@@ -336,7 +322,7 @@ export default function Navbar() {
                   <Link
                     href={dashboardLink}
                     onClick={closeAll}
-                    className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm ${divider}`}
+                    className="flex items-center gap-3 rounded-xl border border-white/10 px-4 py-3 text-sm"
                   >
                     <LayoutDashboard size={17} />
                     Dashboard
@@ -346,7 +332,7 @@ export default function Navbar() {
                     <Link
                       href={profileLink}
                       onClick={closeAll}
-                      className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm ${divider}`}
+                      className="flex items-center gap-3 rounded-xl border border-white/10 px-4 py-3 text-sm"
                     >
                       <UserRound size={17} />
                       Profile Settings
@@ -355,7 +341,7 @@ export default function Navbar() {
 
                   <button
                     onClick={handleSignOut}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-500"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-400"
                   >
                     <LogOut size={17} />
                     Logout
@@ -366,7 +352,7 @@ export default function Navbar() {
                   <Link
                     href="/sign-in"
                     onClick={closeAll}
-                    className="rounded-full border border-current py-3 text-center text-sm font-medium"
+                    className="rounded-full border border-white/20 py-3 text-center text-sm font-medium"
                   >
                     Sign In
                   </Link>
@@ -374,7 +360,7 @@ export default function Navbar() {
                   <Link
                     href="/sign-up"
                     onClick={closeAll}
-                    className="flex items-center justify-center gap-2 rounded-full bg-[#c9a77c] py-3 text-sm font-semibold text-black"
+                    className="flex items-center justify-center gap-2 rounded-full bg-[#d8b68c] py-3 text-sm font-semibold text-[#171815]"
                   >
                     Sign Up
                     <ArrowUpRight size={16} />
