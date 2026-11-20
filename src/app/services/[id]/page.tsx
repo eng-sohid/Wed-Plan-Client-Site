@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-
 import BookingForm from "./booking-form";
-import { ArrowLeft, Heart, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Heart, Sparkles } from "lucide-react";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
@@ -55,187 +54,201 @@ export default function ServiceDetailsPage() {
   // Loading State
   if (loading) {
     return (
-      <>
-        <div className="flex min-h-[70vh] items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 border-t-rose-500" />
+      <main className="flex min-h-[70vh] items-center justify-center bg-[#171815]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#d8b68c]/20 bg-[#20211e]">
+            <Sparkles className="h-6 w-6 animate-pulse text-[#d8b68c]" />
+          </div>
+          <p className="text-xs tracking-[0.25em] text-white/40">
+            LOADING SERVICE
+          </p>
         </div>
-      </>
+      </main>
     );
   }
 
   // Error State
   if (error || !service) {
     return (
-      <>
-        <div className="flex min-h-[70vh] flex-col items-center justify-center px-5 text-center">
-          <h2 className="text-3xl font-bold text-gray-800">
-            {error || "Service Not Found"}
-          </h2>
-
-          <Link
-            href="/services"
-            className="mt-6 rounded-full bg-rose-500 px-7 py-3 text-white transition hover:bg-rose-600"
-          >
-            Back to Services
-          </Link>
-        </div>
-      </>
+      <main className="flex min-h-[70vh] flex-col items-center justify-center bg-[#171815] px-5 text-center">
+        <Heart size={36} className="mb-6 text-[#d8b68c]" />
+        <h2 className="font-serif text-3xl text-[#faf9f6]">
+          {error || "Service Not Found"}
+        </h2>
+        <p className="mt-4 text-sm text-white/45">
+          Sorry, we couldn&apos;t find the service you&apos;re looking for.
+        </p>
+        <Link
+          href="/services"
+          className="mt-8 inline-flex items-center gap-2 bg-[#d8b68c] px-7 py-3 text-sm font-semibold text-[#171815] transition hover:bg-[#faf9f6]"
+        >
+          <ArrowLeft size={17} />
+          Back to Services
+        </Link>
+      </main>
     );
   }
 
   return (
-    <>
-      <main className="min-h-screen bg-[#fffaf9]">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden bg-rose-50 px-6 py-16 text-center md:py-24">
-          <div className="absolute -left-20 top-0 h-64 w-64 rounded-full bg-rose-200/30 blur-3xl" />
+    <main className="min-h-screen bg-[#171815]">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b border-white/10 px-5 py-24 text-center sm:px-8 lg:py-32">
+        <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#526b50]/10 blur-[120px]" />
+        <div className="pointer-events-none absolute -right-32 bottom-0 h-96 w-96 rounded-full bg-[#d8b68c]/5 blur-[120px]" />
 
-          <div className="absolute -right-20 bottom-0 h-64 w-64 rounded-full bg-pink-200/40 blur-3xl" />
+        <div className="relative mx-auto max-w-4xl">
+          <div className="mb-7 flex items-center justify-center gap-3 text-[#d8b68c]">
+            <Sparkles size={16} />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.35em] sm:text-xs">
+              WedPlan Exclusive Service
+            </span>
+            <Sparkles size={16} />
+          </div>
 
-          <div className="relative mx-auto max-w-3xl">
-            <div className="mb-5 flex items-center justify-center gap-2 text-rose-500">
-              <Sparkles size={18} />
+          <h1 className="font-serif text-4xl leading-tight text-[#faf9f6] sm:text-5xl lg:text-6xl">
+            {service.title}
+          </h1>
 
-              <span className="text-xs font-semibold uppercase tracking-[0.3em]">
-                WedPlan Exclusive Service
+          <p className="mx-auto mt-7 max-w-xl text-sm leading-8 text-white/50 sm:text-base">
+            Make your special day unforgettable with our carefully selected
+            wedding services.
+          </p>
+
+          <div className="mt-9">
+            <span className="inline-flex border border-[#d8b68c]/30 bg-[#d8b68c]/5 px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-[#d8b68c]">
+              {service.category}
+            </span>
+          </div>
+
+          <div className="mx-auto mt-10 h-px w-20 bg-[#d8b68c]/50" />
+        </div>
+      </section>
+
+      {/* Service Details Section */}
+      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 md:py-24">
+        <Link
+          href="/services"
+          className="mb-12 inline-flex items-center gap-2 text-sm text-white/50 transition hover:text-[#d8b68c]"
+        >
+          <ArrowLeft size={17} />
+          Back to Services
+        </Link>
+
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+          {/* Service Image */}
+          <div className="group relative">
+            <div className="absolute -bottom-4 -right-4 h-full w-full border border-[#d8b68c]/30" />
+
+            <div className="relative h-[320px] overflow-hidden bg-[#20211e] sm:h-[420px] lg:h-[520px]">
+              {service.image ? (
+                <Image
+                  src={service.image}
+                  alt={service.title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-white/40">
+                  No Image Available
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Service Information */}
+          <div className="relative">
+            <div className="mb-6 flex items-center gap-3 text-[#d8b68c]">
+              <Heart size={19} />
+              <span className="text-xs font-semibold uppercase tracking-[0.25em]">
+                Your Dream, Our Passion
               </span>
-
-              <Sparkles size={18} />
             </div>
 
-            <h1 className="text-4xl font-bold leading-tight text-gray-900 md:text-6xl">
-              {service.title}
-            </h1>
+            <h2 className="font-serif text-3xl leading-tight text-[#faf9f6] sm:text-4xl lg:text-5xl">
+              Make Your Wedding
+              <span className="mt-2 block italic text-[#d8b68c]">
+                Truly Special.
+              </span>
+            </h2>
 
-            <p className="mx-auto mt-5 max-w-xl leading-8 text-gray-600">
-              Make your special day unforgettable with our carefully selected
-              wedding services.
+            <div className="my-8 h-px w-20 bg-[#d8b68c]/60" />
+
+            <p className="text-base leading-9 text-white/70">
+              {service.description}
             </p>
 
-            <div className="mt-8 flex justify-center">
-              <span className="rounded-full border border-rose-200 bg-white px-6 py-2 text-sm font-semibold text-rose-500 shadow-sm">
-                {service.category}
-              </span>
-            </div>
+            <p className="mt-6 text-sm leading-8 text-white/40">
+              At WedPlan, we believe every wedding deserves something special.
+              Our goal is to help you create beautiful memories that last
+              forever.
+            </p>
+
+            <a
+              href="#booking"
+              className="group mt-9 inline-flex items-center gap-4 bg-[#d8b68c] px-8 py-4 text-xs font-semibold uppercase tracking-[0.15em] text-[#171815] transition hover:bg-[#faf9f6]"
+            >
+              Book This Service
+              <ArrowUpRight
+                size={18}
+                className="transition-transform group-hover:-translate-y-1 group-hover:translate-x-1"
+              />
+            </a>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Service Details Section */}
-        <section className="mx-auto max-w-7xl px-6 py-16 md:px-12 md:py-24">
-          <Link
-            href="/services"
-            className="mb-10 inline-flex items-center gap-2 text-sm font-semibold text-gray-600 transition hover:text-rose-500"
-          >
-            <ArrowLeft size={18} />
-            Back to Services
-          </Link>
+      {/* Booking Form Section */}
+      <section
+        id="booking"
+        className="scroll-mt-24 border-t border-white/10 bg-[#1c1d19] px-5 py-20 sm:px-8 md:py-28"
+      >
+        <div className="mx-auto max-w-3xl">
+          <div className="mb-12 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#d8b68c]">
+              Start Your Journey
+            </p>
 
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-            {/* Service Image */}
-            <div className="group relative">
-              <div className="absolute -bottom-4 -right-4 h-full w-full rounded-3xl border-2 border-rose-200" />
+            <h2 className="mt-5 font-serif text-3xl text-[#faf9f6] sm:text-4xl">
+              Book Your Dream Wedding
+            </h2>
 
-              <div className="relative h-[320px] overflow-hidden rounded-3xl shadow-xl md:h-[500px]">
-                {service.image ? (
-                  <Image
-                    src={service.image}
-                    alt={service.title}
-                    width={500}
-                    height={300}
-                  />
-                ) : (
-                  <div className="flex h-[300px] items-center justify-center bg-gray-100">
-                    No Image Available
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Service Information */}
-            <div>
-              <div className="mb-5 flex items-center gap-2 text-rose-500">
-                <Heart size={18} />
-
-                <span className="text-sm font-semibold uppercase tracking-[0.2em]">
-                  Your Dream, Our Passion
-                </span>
-              </div>
-
-              <h2 className="text-3xl font-bold leading-tight text-gray-900 md:text-5xl">
-                Make Your Wedding
-                <span className="mt-2 block text-rose-500">Truly Special</span>
-              </h2>
-
-              <div className="my-7 h-1 w-20 rounded-full bg-rose-400" />
-
-              <p className="text-lg leading-9 text-gray-600">
-                {service.description}
-              </p>
-
-              <p className="mt-5 leading-8 text-gray-500">
-                At WedPlan, we believe every wedding deserves something special.
-                Our goal is to help you create beautiful memories that last
-                forever.
-              </p>
-
-              {/* Booking Button */}
-              <a
-                href="#booking"
-                className="mt-9 inline-flex items-center gap-3 rounded-full bg-rose-500 px-8 py-4 font-semibold text-white shadow-lg shadow-rose-200 transition hover:-translate-y-1 hover:bg-rose-600"
-              >
-                Book This Service
-                <span>→</span>
-              </a>
-            </div>
+            <p className="mx-auto mt-5 max-w-xl text-sm leading-8 text-white/45">
+              Fill out the form below and let us help you make your special day
+              unforgettable.
+            </p>
           </div>
-        </section>
 
-        {/* Booking Form Section */}
-        <section
-          id="booking"
-          className="scroll-mt-24 bg-rose-50/60 px-6 py-16 md:py-24"
-        >
-          <div className="mx-auto max-w-3xl">
-            <div className="mb-10 text-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-rose-500">
-                Start Your Journey
-              </p>
+          <BookingForm serviceId={service._id} serviceTitle={service.title} />
+        </div>
+      </section>
 
-              <h2 className="mt-4 text-3xl font-bold text-gray-900 md:text-4xl">
-                Book Your Dream Wedding
-              </h2>
+      {/* Bottom Section */}
+      <section className="relative overflow-hidden border-t border-white/10 bg-[#171815] px-5 py-20 text-center sm:px-8">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d8b68c]/5 blur-[100px]" />
 
-              <p className="mx-auto mt-4 max-w-xl leading-7 text-gray-600">
-                Fill out the form below and let us help you make your special
-                day unforgettable.
-              </p>
-            </div>
+        <div className="relative mx-auto max-w-2xl">
+          <Heart className="mx-auto mb-6 text-[#d8b68c]" size={30} />
 
-            <BookingForm serviceId={service._id} serviceTitle={service.title} />
-          </div>
-        </section>
-
-        {/* Bottom Section */}
-        <section className="bg-white px-6 py-16 text-center">
-          <Heart className="mx-auto mb-5 text-rose-400" size={30} />
-
-          <h2 className="text-3xl font-bold text-gray-900">
-            Let&apos;s Make Your Day Beautiful
+          <h2 className="font-serif text-3xl text-[#faf9f6] sm:text-4xl">
+            Let&apos;s Make Your Day
+            <span className="block mt-2 italic text-[#d8b68c]">Beautiful.</span>
           </h2>
 
-          <p className="mx-auto mt-4 max-w-xl leading-7 text-gray-600">
+          <p className="mx-auto mt-6 max-w-xl text-sm leading-8 text-white/45">
             Your dream wedding starts with the right plan. Let WedPlan help you
             make every moment memorable.
           </p>
 
           <Link
             href="/services"
-            className="mt-8 inline-block rounded-full border border-rose-400 px-8 py-3 font-semibold text-rose-500 transition hover:bg-rose-500 hover:text-white"
+            className="mt-9 inline-flex items-center gap-3 border border-[#d8b68c]/40 px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.15em] text-[#d8b68c] transition hover:bg-[#d8b68c] hover:text-[#171815]"
           >
             Explore More Services
+            <ArrowUpRight size={17} />
           </Link>
-        </section>
-      </main>
-    </>
+        </div>
+      </section>
+    </main>
   );
 }
