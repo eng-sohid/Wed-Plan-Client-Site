@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   CalendarDays,
   MapPin,
@@ -8,29 +10,26 @@ import {
   Send,
   Sparkles,
 } from "lucide-react";
-import { api } from "@/lib/api";
+import { api, errMsg } from "@/lib/api";
 
 type BookingFormProps = {
   serviceId: string;
   serviceTitle: string;
 };
 
+const emptyForm = { eventDate: "", eventLocation: "", message: "" };
+
 export default function BookingForm({
   serviceId,
   serviceTitle,
 }: BookingFormProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
+  const [formData, setFormData] = useState(emptyForm);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    eventDate: "",
-    eventLocation: "",
-    message: "",
-  });
+  const today = new Date().toISOString().split("T")[0];
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -44,6 +43,11 @@ export default function BookingForm({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!formData.eventDate || !formData.eventLocation.trim()) {
+      toast.error("Event date and location are required");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
     setSuccess(false);
@@ -54,29 +58,23 @@ export default function BookingForm({
         body: {
           serviceId,
           eventDate: formData.eventDate,
-          eventLocation: formData.eventLocation,
-          message: formData.message,
+          eventLocation: formData.eventLocation.trim(),
+          message: formData.message.trim(),
         },
       });
 
       setSuccess(true);
       setMessage("Your booking request has been submitted successfully!");
+      toast.success("Booking request submitted!");
+      setFormData(emptyForm);
 
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        eventDate: "",
-        eventLocation: "",
-        message: "",
-      });
+      // Customer ke tar booking list e niye jai
+      setTimeout(() => router.push("/dashboard/customer/bookings"), 1200);
     } catch (error) {
+      const text = errMsg(error);
       setSuccess(false);
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong. Please try again.",
-      );
+      setMessage(text);
+      toast.error(text);
     } finally {
       setLoading(false);
     }
@@ -133,6 +131,7 @@ export default function BookingForm({
                 id="eventDate"
                 type="date"
                 name="eventDate"
+                min={today}
                 value={formData.eventDate}
                 onChange={handleChange}
                 required

@@ -3,34 +3,42 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import BookingForm from "./booking-form";
+import { publicApi } from "@/lib/api";
+import { useSession } from "@/lib/auth-client";
 import {
   ArrowLeft,
   ArrowUpRight,
   Heart,
   Sparkles,
   ImageIcon,
+  MapPin,
 } from "lucide-react";
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
 type Service = {
   _id: string;
   serviceName: string;
   category: string;
   description: string;
+  price: number;
+  location: string;
   images?: string[];
+  vendorName?: string;
+  vendorBusinessName?: string;
+  vendorImage?: string;
 };
 
 export default function ServiceDetailsPage() {
   const params = useParams();
   const id = params.id as string;
 
+  const { data: session, isPending } = useSession();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
     const fetchService = async () => {
@@ -38,26 +46,16 @@ export default function ServiceDetailsPage() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(`${BASE_URL}/services/${id}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Service not found!");
-        }
-
+        const data = await publicApi<{ service: Service }>(`/services/${id}`);
         setService(data.service);
-      } catch (error) {
-        setError(
-          error instanceof Error ? error.message : "Something went wrong!",
-        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong!");
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) {
-      fetchService();
-    }
+    if (id) fetchService();
   }, [id]);
 
   // Loading State
@@ -115,23 +113,22 @@ export default function ServiceDetailsPage() {
     );
   }
 
-  const serviceImage = service.images?.[0];
+  const images = service.images ?? [];
+  const serviceImage = images[activeImage] || images[0];
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#171815]">
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-white/[0.08] px-5 py-24 text-center sm:px-8 lg:py-32">
+      <section className="relative overflow-hidden border-b border-white/[0.08] px-5 pb-24 pt-32 text-center sm:px-8 lg:pb-32 lg:pt-40">
         <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#526b50]/10 blur-[120px]" />
         <div className="pointer-events-none absolute -right-32 bottom-0 h-96 w-96 rounded-full bg-[#d8b68c]/[0.06] blur-[120px]" />
 
         <div className="relative mx-auto max-w-4xl">
           <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-[#d8b68c]/20 bg-[#d8b68c]/[0.06] px-5 py-2.5">
             <Sparkles size={14} className="text-[#d8b68c]" />
-
             <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#d8b68c]">
               WedPlan Exclusive Service
             </span>
-
             <Sparkles size={14} className="text-[#d8b68c]" />
           </div>
 
@@ -166,45 +163,64 @@ export default function ServiceDetailsPage() {
           Back to Services
         </Link>
 
-        <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-20">
-          {/* Service Image */}
-          <div className="group relative">
-            <div className="absolute -bottom-4 -right-4 h-full w-full rounded-2xl border border-[#d8b68c]/30" />
+        <div className="grid items-start gap-14 lg:grid-cols-2 lg:gap-20">
+          {/* Service Images */}
+          <div>
+            <div className="group relative">
+              <div className="absolute -bottom-4 -right-4 h-full w-full rounded-2xl border border-[#d8b68c]/30" />
 
-            <div className="relative h-[320px] overflow-hidden rounded-2xl bg-[#20211e] sm:h-[430px] lg:h-[540px]">
-              {serviceImage ? (
-                <Image
-                  src={serviceImage}
-                  alt={service.serviceName}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              ) : (
-                <div className="flex h-full flex-col items-center justify-center gap-4 text-white/35">
-                  <ImageIcon size={42} strokeWidth={1} />
-                  <p className="text-xs uppercase tracking-[0.2em]">
-                    No Image Available
-                  </p>
+              <div className="relative h-[320px] overflow-hidden rounded-2xl bg-[#20211e] sm:h-[430px] lg:h-[540px]">
+                {serviceImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={serviceImage}
+                    alt={service.serviceName}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center gap-4 text-white/35">
+                    <ImageIcon size={42} strokeWidth={1} />
+                    <p className="text-xs uppercase tracking-[0.2em]">
+                      No Image Available
+                    </p>
+                  </div>
+                )}
+
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+
+                <div className="absolute bottom-5 left-5 rounded-full border border-white/20 bg-black/30 px-4 py-2 backdrop-blur-md">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white">
+                    {service.category}
+                  </span>
                 </div>
-              )}
-
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-
-              <div className="absolute bottom-5 left-5 rounded-full border border-white/20 bg-black/30 px-4 py-2 backdrop-blur-md">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white">
-                  {service.category}
-                </span>
               </div>
             </div>
+
+            {/* Thumbnails */}
+            {images.length > 1 && (
+              <div className="mt-8 flex gap-3 overflow-x-auto pb-2">
+                {images.map((img, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={img + i}
+                    src={img}
+                    alt={`${service.serviceName} ${i + 1}`}
+                    onClick={() => setActiveImage(i)}
+                    className={`h-20 w-28 shrink-0 cursor-pointer rounded-lg object-cover transition ${
+                      i === activeImage
+                        ? "ring-2 ring-[#d8b68c]"
+                        : "opacity-50 hover:opacity-100"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Service Information */}
           <div className="relative">
             <div className="mb-7 flex items-center gap-3 text-[#d8b68c]">
               <Heart size={19} />
-
               <span className="text-[10px] font-semibold uppercase tracking-[0.25em]">
                 Your Dream, Our Passion
               </span>
@@ -219,8 +235,62 @@ export default function ServiceDetailsPage() {
 
             <div className="my-8 h-px w-20 bg-[#d8b68c]/60" />
 
+            {/* Price & Location */}
+            <div className="mb-6 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/[0.07] bg-[#20211e] p-5">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+                  Price
+                </p>
+                <p className="mt-2 font-serif text-3xl text-[#d8b68c]">
+                  ${Number(service.price).toLocaleString()}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/[0.07] bg-[#20211e] p-5">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+                  Location
+                </p>
+                <p className="mt-2 flex items-center gap-2 text-lg text-white/80">
+                  <MapPin size={18} className="shrink-0 text-[#d8b68c]" />
+                  {service.location}
+                </p>
+              </div>
+            </div>
+
+            {/* Vendor */}
+            <div className="mb-6 flex items-center gap-4 rounded-2xl border border-white/[0.07] bg-[#20211e] p-5">
+              {service.vendorImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={service.vendorImage}
+                  alt={service.vendorName || "Vendor"}
+                  className="h-12 w-12 rounded-full object-cover"
+                />
+              ) : (
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#d8b68c] font-semibold text-black">
+                  {(service.vendorName || "V").charAt(0).toUpperCase()}
+                </span>
+              )}
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+                  Vendor
+                </p>
+                <p className="mt-1 truncate text-white/85">
+                  {service.vendorBusinessName ||
+                    service.vendorName ||
+                    "WedPlan Vendor"}
+                </p>
+                {service.vendorBusinessName && service.vendorName && (
+                  <p className="truncate text-xs text-white/40">
+                    {service.vendorName}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
             <div className="rounded-2xl border border-white/[0.07] bg-[#20211e] p-6 sm:p-7">
-              <p className="text-base leading-9 text-white/75">
+              <p className="whitespace-pre-line text-base leading-9 text-white/75">
                 {service.description}
               </p>
             </div>
@@ -271,10 +341,24 @@ export default function ServiceDetailsPage() {
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-[#20211e] p-5 shadow-2xl shadow-black/10 sm:p-8">
-            <BookingForm
-              serviceId={service._id}
-              serviceTitle={service.serviceName}
-            />
+            {isPending ? (
+              <p className="py-6 text-center text-sm text-white/50">
+                Loading...
+              </p>
+            ) : role === "customer" ? (
+              <BookingForm
+                serviceId={service._id}
+                serviceTitle={service.serviceName}
+              />
+            ) : (
+              <p className="py-6 text-center text-sm leading-7 text-white/55">
+                {role === "vendor"
+                  ? "Vendors cannot book services. Please sign in with a customer account to book."
+                  : role === "admin"
+                    ? "Admins cannot submit booking requests."
+                    : "Please sign in as a customer to book this service."}
+              </p>
+            )}
           </div>
         </div>
       </section>
